@@ -8,11 +8,11 @@
       <span class="sortby">Sort by:</span>
       <a href="javascript:void(0)" class="default cur">Default</a>
       <a href="javascript:void(0)" class="price">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
-      <a href="javascript:void(0)" class="filterby stopPop">Filter by</a>
+      <a href="javascript:void(0)" class="filterby stopPop" @click="showFilterPop">Filter by</a>
     </div>
     <div class="accessory-result">
       <!-- filter -->
-      <div class="filter stopPop" id="filter">
+      <div class="filter stopPop" id="filter" :class="{'filterby-show':filterBy}">
         <dl class="filter-price">
           <dt>Price:</dt>
           <dd><a href="javascript:void(0)" :class="{'cur':selectedPrice==-1 }" @click="priceSelect(-1)">All</a></dd>
@@ -28,7 +28,7 @@
           <ul>
             <li  v-for="item in goodsList" :key="item.productId">
               <div class="pic">
-                <a href="#"><img :src="'/static/'+item.prodcutImg"  alt=""></a>
+                <a href="#"><img v-lazy="'/static/'+item.prodcutImg"  alt=""></a>
               </div>
               <div class="main">
                 <div class="name">{{item.productName}}</div>
@@ -44,6 +44,7 @@
     </div>
   </div>
 </div>
+<div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
 <nav-footer></nav-footer>
   </div>
 </template>
@@ -71,7 +72,10 @@
             endPrice:'1500.00'
           }
         ],
-        selectedPrice:-1
+        selectedPrice:-1,
+        priceChecked:'all',
+        filterBy:false,  //弹出层
+        overLayFlag:false  //遮罩层
       }
     },
     mounted(){
@@ -85,7 +89,16 @@
          })
        },
        priceSelect(index){
-         this.selectedPrice = index
+         this.selectedPrice = index;
+         this.closePop();
+       },
+       showFilterPop(){
+          this.filterBy =true;
+          this.overLayFlag =true
+       },
+       closePop(){
+          this.filterBy =false;
+          this.overLayFlag =false
        }
     },
      components: {
