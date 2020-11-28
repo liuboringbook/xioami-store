@@ -7,7 +7,7 @@
     <div class="filter-nav">
       <span class="sortby">Sort by:</span>
       <a href="javascript:void(0)" class="default cur">Default</a>
-      <a href="javascript:void(0)" class="price">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
+      <a href="javascript:void(0)" class="price" @click="sortGoods">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
       <a href="javascript:void(0)" class="filterby stopPop" @click="showFilterPop">Filter by</a>
     </div>
     <div class="accessory-result">
@@ -28,18 +28,21 @@
           <ul>
             <li  v-for="item in goodsList" :key="item.productId">
               <div class="pic">
-                <a href="#"><img v-lazy="'/static/'+item.prodcutImg"  alt=""></a>
+                <a href="#"><img v-lazy="'/static/'+item.productImage"  alt=""></a>
               </div>
               <div class="main">
                 <div class="name">{{item.productName}}</div>
-                <div class="price">{{item.prodcutPrice}}</div>
+                <div class="price">{{item.salePrice}}</div>
                 <div class="btn-area">
-                  <a href="javascript:;" class="btn btn--m">加入购物车</a>
+                  <a href="javascript:;" class="btn btn--m" @click="addCart(item.productId)">加入购物车</a>
                 </div>
               </div>
             </li>
           </ul>
         </div>
+        <div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="20" class="load-more">
+           <img src="./../assets/loading-spinning-bubbles.svg" v-show="loading">
+</div>
       </div>
     </div>
   </div>
@@ -58,6 +61,7 @@
     data() {
       return {
         goodsList: [],
+        sortFlag:1,
         priceFilter:[
           {
             startPrice:'0.00',
@@ -74,22 +78,57 @@
         ],
         selectedPrice:-1,
         priceChecked:'all',
+        page:1,
+        pageSize:8,
+        loading: false,
+        busy: false, //插件参数
         filterBy:false,  //弹出层
         overLayFlag:false  //遮罩层
       }
     },
     mounted(){
-      this.getGoodsData()
+      this.getGoodsList(false)
     },
     methods: {
-       getGoodsData(){
-         axios.get("/api/goods").then(res=>{
-           this.goodsList =res.data.data.result
+       getGoodsList(flag){
+         let param ={
+           page: this.page,
+           pageSize:this.pageSize,
+           sort:this.sortFlag? 1:-1,
+           priceLevel:this.selectedPrice
+         }
+         axios.get("/goods",{params:param}).then(response=>{
+           let res = response.data;
+           this.loading =false;
+           if(res.status == 0){
+             if(flag){
+
+               this.goodsList = this.goodsList.concat(res.result.list)
+               console.log(this.goodsList)
+               if(res.result.count ==0){
+                 this.busy =true
+               }else{
+                 this.busy =false
+               }
+             }else{
+                this.goodsList =res.result.list;
+                this.busy =true
+             }
+           }else{
+             this.goodsList =[]
+           }
            console.log(this.goodsList)
          })
        },
+       sortGoods(){
+         this.sortFlag = !this.sortFlag;
+         this.page =1;
+         this.getGoodsList();
+       },
        priceSelect(index){
          this.selectedPrice = index;
+         this.page =1;
+         this.getGoodsList();
          this.closePop();
        },
        showFilterPop(){
@@ -99,6 +138,28 @@
        closePop(){
           this.filterBy =false;
           this.overLayFlag =false
+       },
+       loadMore(){
+          this.busy =true;
+          this.loading =true
+         setTimeout(() => {
+          this.page++;
+          this.getGoodsList(true);
+          console.log(this.busy)
+         }, 500);
+       },
+       //加入购物车
+       addCart(productId){
+           axios.post("/goods/addCart",{productId:productId}).then((res)=>{
+             var res =res.data
+             console.log(res)
+               if(res.status == 0){
+                 alert('加入成功')
+               }else{
+                 console.log(res.status)
+                 alert("msg："+res.msg)
+               }
+           })
        }
     },
      components: {
@@ -110,4 +171,19 @@
 </script>
 
 <style scoped>
+ .accessory-list{
+   flex:1;
+ }
+ .accessory-list ul::after{
+   clear:both;
+   content:' ';
+   height: 0;
+   display:block;
+   visibility: hidden;
+ }
+ .load-more{
+   height: 100px;
+   line-height: 100px;
+   text-align: center;
+ }
 </style>

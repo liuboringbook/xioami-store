@@ -48,15 +48,15 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
-    },
-    before(app){
-      app.get('/api/goods',(req,res)=>{
-        res.json({
-          status:0,
-          data:goods
-        })
-      })
-    },
+    }
+    // before(app){
+    //   app.get('/api/goods',(req,res)=>{
+    //     res.json({
+    //       status:0,
+    //       data:goods
+    //     })
+    //   })
+    // },
   },
   plugins: [
     new webpack.DefinePlugin({
