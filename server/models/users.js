@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 
 var userSchema = new mongoose.Schema({
    "userId":String,
-   "useName":String,
+   "userName":String,
    "userPwd":String,
    "orderList":Array,
    "cartList":[{
@@ -17,4 +17,4 @@ var userSchema = new mongoose.Schema({
 });
 
 
-module.exports = mongoose.model("User",userSchema)
+module.exports = mongoose.model("Users",userSchema)

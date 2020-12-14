@@ -18,7 +18,7 @@ mongoose.connection.on("disconnected",function(){
   console.log("MongoDB connected disconnected.")
 })
 // 查询商品列表
-router.get("/",function(req,res,next){
+router.get("/list",function(req,res,next){
   let page = parseInt(req.param("page"));
   let pageSize = parseInt(req.param("pageSize"));
   let skip = (page-1)*pageSize
@@ -63,7 +63,7 @@ router.get("/",function(req,res,next){
 //加入购物车
 router.post("/addCart",function(req,res,next){
   var userId ='100000077';
-  var User =require('../models/user');
+  var User =require('../models/users');
   var productId = req.body.productId;
  User.findOne({userId:userId},function(err,userDoc){
       if(err){
@@ -72,17 +72,21 @@ router.post("/addCart",function(req,res,next){
           msg:err.message
         })
       }else{
-        console.log("userDoc:"+userDoc)
         if(userDoc){
           let goodsItem ='';
             userDoc.cartList.forEach(function(item){
               if(item.productId == productId){
                 goodsItem =item;
                 item.productNum ++;
+                // if(item.productNum && !isNaN(item.productNum)){
+                //   item.productNum ++;
+                // }else{
+
+                // }
               }
             })
           if(goodsItem){
-            userDoc.save(function(err2,doc){
+            userDoc.save(function(err2,doc2){
               if(err2){
                 res.json({
                   status:"1",
@@ -108,6 +112,7 @@ router.post("/addCart",function(req,res,next){
                   doc.productNum =1;
                   doc.checked=1;
                   userDoc.cartList.push(doc);
+                  console.log(userDoc)
                   userDoc.save(function(err2,doc){
                       if(err2){
                         res.json({

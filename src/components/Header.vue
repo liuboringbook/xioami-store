@@ -28,7 +28,7 @@
             </div>
             <div class="navbar-right-container" style="display: flex;">
               <div class="navbar-menu-container">
-                <span class="navbar-link" v-text="nickName" v-if="nickName"></span>
+                <span class="navbar-link" v-if="nickName">{{nickName}}</span>
                 <a href="javascript:void(0)" class="navbar-link" @click="loginModalFlag=true" v-if="!nickName">Login</a>
                 <a href="javascript:void(0)" class="navbar-link" @click="logOut" v-else>Logout</a>
                 <div class="navbar-cart-container">
@@ -75,7 +75,62 @@
 </template>
 <script>
    import './../assets/css/login.css'
+    import axios from 'axios'
    export default{
+        data() {
+          return {
+            userName: '',
+            userPwd:'',
+            errorTip:false,
+            loginModalFlag:false,
+            nickName:''
+          }
+        },
+        mounted(){
+          console.log('mounted')
+           this.checkLogin();
+        },
+        methods: {
+          login() {
+            if(!this.userName || !this.userPwd){
+              this.errorTip =true;
+              return;
+            }
+             axios.post("/users/login",{
+               userName:this.userName,
+               userPwd:this.userPwd
+             }).then((response)=>{
+                let res =response.data;
+
+                if(res.status == "0"){
+                  this.errorTip =false
+                  this.loginModalFlag =false
+                  console.log(res)
+                  console.log(res.result.userName)
+                  this.nickName =res.result.userName
+                }else{
+                  this.errorTip =true
+                }
+             })
+          },
+          logOut(){
+            axios.post("/users/logout").then((response)=>{
+              console.log(res)
+              let res =response.data;
+              if(res.status === "0"){
+                 this.nickName ="";
+              }
+            })
+          },
+        checkLogin(){
+          axios.get("/users/checkLogin").then((response)=>{
+            let res =response.data;
+            if(res.status === '0'){
+              this.nickName =res.result
+            }
+          })
+        }
+      },
 
    }
 </script>

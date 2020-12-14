@@ -7,7 +7,7 @@
     <div class="filter-nav">
       <span class="sortby">Sort by:</span>
       <a href="javascript:void(0)" class="default cur">Default</a>
-      <a href="javascript:void(0)" class="price" @click="sortGoods">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
+      <a href="javascript:void(0)" class="price" @click="sortGoods">Price <svg class="icon icon-arrow-short" :class="{'sort-up':!sortFlag}"><use xlink:href="#icon-arrow-short" ></use></svg></a>
       <a href="javascript:void(0)" class="filterby stopPop" @click="showFilterPop">Filter by</a>
     </div>
     <div class="accessory-result">
@@ -48,6 +48,29 @@
   </div>
 </div>
 <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
+<!-- 未登录  -->
+<model v-bind:mdShow="mdShow" @close="closeModel">
+  <p slot="message">
+    请先登录，否则无法加入到购物车中
+  </p>
+  <div slot="btnGroup" >
+      <a class="btn btn--m" @click="closeModel">关闭</a>
+  </div>
+</model>
+
+<!-- 登录状态 -->
+<model v-bind:mdShow="mdshowCart" @close="closeModel">
+     <p slot="message">
+          <svg class="icon-status-ok">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-status-ok"></use>
+          </svg>
+          <span>加入购物车成功！</span>
+     </p>
+     <div slot="btnGroup">
+      <a class="btn btn--m" href="javascript:;" @click="closeModel">继续购物</a>
+      <router-link class="btn btn--m btn--red" href="javascript:;" to="/cart">查看购物车</router-link>
+     </div>
+</model>
 <nav-footer></nav-footer>
   </div>
 </template>
@@ -55,6 +78,7 @@
 <script>
   import NavHeader from '@/components/Header.vue'
   import NavFooter from '@/components/Footer.vue'
+  import Model from '@/components/model.vue'
   import NavBread from '@/components/Bread.vue'
   import axios from 'axios'
   export default {
@@ -83,7 +107,9 @@
         loading: false,
         busy: false, //插件参数
         filterBy:false,  //弹出层
-        overLayFlag:false  //遮罩层
+        overLayFlag:false,  //遮罩层
+        mdShow: false, // 未登录模态框显示
+        mdshowCart: false //登录模态框显示
       }
     },
     mounted(){
@@ -97,7 +123,7 @@
            sort:this.sortFlag? 1:-1,
            priceLevel:this.selectedPrice
          }
-         axios.get("/goods",{params:param}).then(response=>{
+         axios.get("/goods/list",{params:param}).then(response=>{
            let res = response.data;
            this.loading =false;
            if(res.status == 0){
@@ -154,18 +180,22 @@
              var res =res.data
              console.log(res)
                if(res.status == 0){
-                 alert('加入成功')
+                 this.mdshowCart=true
                }else{
-                 console.log(res.status)
-                 alert("msg："+res.msg)
+                 this.mdShow = true
                }
            })
+       },
+       closeModel(){
+         this.mdShow =false
+         this.mdshowCart =false
        }
     },
      components: {
        NavHeader,
        NavFooter,
-       NavBread
+       NavBread,
+       Model
      },
   }
 </script>
@@ -185,5 +215,16 @@
    height: 100px;
    line-height: 100px;
    text-align: center;
+ }
+ .sort-up{
+   transform: rotate(180deg);
+   transition: all .3s ease-in-out;
+ }
+ .icon-arrow-short{
+   transition: all .3s ease-in-out;
+ }
+ .btn:hover{
+   background: #ffe5e6;
+   transition: all .3s ease-out;
  }
 </style>
