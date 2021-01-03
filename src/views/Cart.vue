@@ -76,7 +76,7 @@
               </div>
             </div>
             <div class="cart-tab-2">
-              <div class="item-price">{{item.salePrice}}</div>
+              <div class="item-price">{{item.salePrice|currency('$')}}</div>
             </div>
             <div class="cart-tab-3">
               <div class="item-quantity">
@@ -121,10 +121,10 @@
         </div>
         <div class="cart-foot-r">
           <div class="item-total">
-            Item total: <span class="total-price">{{totalPrice}}</span>
+            Item total: <span class="total-price">{{totalPrice |currency('$')}}</span>
           </div>
           <div class="btn-wrap">
-            <a class="btn btn--red">Checkout</a>
+            <a class="btn btn--red"  :class="{'btn--dis':checkedCount===0}"  @click="checkout">Checkout</a>
           </div>
         </div>
       </div>
@@ -148,6 +148,7 @@
   import NavBread from './../components/Bread'
   import Model from './../components/Model'
   import axios from 'axios'
+  import {currency} from './..//util/currency'
   export default {
     data() {
       return {
@@ -155,6 +156,9 @@
         modelConfirm:false,
         productId:'',
       }
+    },
+    filters: {
+      currency
     },
     components: {
       NavHeader,
@@ -245,6 +249,16 @@
             console.log("update suc")
           }
         })
+      },
+      // 结算订单
+      checkout(){
+        if(this.checkedCount>0){
+          this.$router.push(
+            {
+              path:"/address"
+            }
+          )
+        }
       }
     },
   }
